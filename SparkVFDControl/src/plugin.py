@@ -8,7 +8,7 @@ from Components.ActionMap import ActionMap
 from Components.config import config, configfile, ConfigSubsection, ConfigEnableDisable, getConfigListEntry, ConfigInteger, ConfigSelection, ConfigYesNo
 from Components.ConfigList import ConfigListScreen, ConfigList
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-from enigma import iPlayableService, eServiceCenter, eTimer
+from enigma import iPlayableService, eServiceCenter, eTimer, eDVBLocalTimeHandler
 from os import system
 from Plugins.Plugin import PluginDescriptor
 from Components.ServiceEventTracker import ServiceEventTracker
@@ -26,12 +26,7 @@ class Channelnumber:
 
 	def __init__(self, session):
 		self.session = session
-		self.updatetime = 1000
-		self.zaPrik = eTimer()
-		self.zaPrik.timeout.get().append(self.vrime)
-		self.zaPrik.start(60*1000, 1)
 		self.onClose = [ ]
-
 		self.__event_tracker = ServiceEventTracker(screen=self,eventmap=
 			{
 				iPlayableService.evUpdatedEventInfo: self.__eventInfoChanged
@@ -93,17 +88,13 @@ class Channelnumber:
 		#################################################
 		return CentChnr
 
-	def vrime(self):
-		clock=int(time())
-		evfd.getInstance().vfd_set_clock(clock)	
-
 ChannelnumberInstance = None
 
 def leaveStandby():
 	print "[VFD-SPARK] Leave Standby"
 	evfd.getInstance().vfd_write_string("....")
 	if config.plugins.VFD_spark.ledMode.value == 'True':
-		evfd.getInstance().vfd_set_light(0)
+		evfd.getInstance().vfd_set_led(False)
 
 def standbyCounterChanged(configElement):
 	print "[VFD-SPARK] In Standby"
@@ -111,14 +102,17 @@ def standbyCounterChanged(configElement):
 	inStandby.onClose.append(leaveStandby)
 	evfd.getInstance().vfd_clear_string()
 	if config.plugins.VFD_spark.ledMode.value == 'True':
-		evfd.getInstance().vfd_set_light(1)
+		evfd.getInstance().vfd_set_led(True)
+
+def setTime():
+	clock=int(time())
+	evfd.getInstance().vfd_set_clock(clock)
 
 def initVFD():
 	print "[VFD-SPARK] initVFD"
 	evfd.getInstance().vfd_write_string("....")
-	clock=int(time())
-	evfd.getInstance().vfd_set_clock(clock)
-	evfd.getInstance().vfd_set_light(0)
+	evfd.getInstance().vfd_set_led(False)
+	setTime()
 
 class VFD_SparkSetup(ConfigListScreen, Screen):
 	def __init__(self, session, args = None):
@@ -200,11 +194,9 @@ class VFD_Spark:
 		self.session = session
 		self.service = None
 		self.onClose = [ ]
-
 		self.Console = Console()
-
 		initVFD()
-
+		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().append(setTime)
 		global ChannelnumberInstance
 		if ChannelnumberInstance is None:
 			ChannelnumberInstance = Channelnumber(session)
@@ -214,7 +206,8 @@ class VFD_Spark:
 
 	def abort(self):
 		print "[VFD-SPARK] aborting"
-		
+		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().remove(setTime)
+
 	config.misc.standbyCounter.addNotifier(standbyCounterChanged, initial_call = False)
 
 def main(menuid):
