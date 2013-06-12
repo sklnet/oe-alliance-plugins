@@ -64,8 +64,6 @@ AM_CONDITIONAL(IXUSSONE, test "$BOXTYPE" == ixussone)
 AM_CONDITIONAL(VENTONHDX, test "$BOXTYPE" == ventonhdx)
 AM_CONDITIONAL(VENTONHDE, test "$BOXTYPE" == ventonhde)
 AM_CONDITIONAL(XP1000, test "$BOXTYPE" == xp1000)
-AM_CONDITIONAL(SPARK, test "$BOXTYPE" == spark)
-AM_CONDITIONAL(SPARK, test "$BOXTYPE" == spark7162)
 if test `echo "$BOXTYPE" | cut -b 1-2` == "dm"; then
 	AC_DEFINE(DREAMBOX, 1, [Dreambox hardware])
 fi
@@ -242,10 +240,6 @@ XtrendRemote/src/Makefile
 XtrendRemote/meta/Makefile
 XtrendRemote/po/Makefile
 
-SparkVFDControl/Makefile
-SparkVFDControl/src/Makefile
-SparkVFDControl/meta/Makefile
-SparkVFDControl/po/Makefile
 
 ])
 AC_OUTPUT

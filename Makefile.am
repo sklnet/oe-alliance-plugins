@@ -50,6 +50,10 @@ if XP1000
 SUBDIRS += XtrendRemote
 endif
 
+if SPARK
+SUBDIRS += SparkVFDControl
+endif
+
 if HAVE_TEMPFANCONTROL
 SUBDIRS += TempFanControl
 endif
