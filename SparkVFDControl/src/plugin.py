@@ -8,7 +8,8 @@ from Components.ActionMap import ActionMap
 from Components.config import config, configfile, ConfigSubsection, ConfigEnableDisable, getConfigListEntry, ConfigInteger, ConfigSelection, ConfigYesNo
 from Components.ConfigList import ConfigListScreen, ConfigList
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-from enigma import iPlayableService, eServiceCenter, eTimer, eDVBLocalTimeHandler
+import ServiceReference
+from enigma import iPlayableService, eServiceCenter, eTimer, eDVBLocalTimeHandler, iServiceInformation
 from os import system
 from Plugins.Plugin import PluginDescriptor
 from Components.ServiceEventTracker import ServiceEventTracker
@@ -29,28 +30,41 @@ class Channelnumber:
 		self.onClose = [ ]
 		self.__event_tracker = ServiceEventTracker(screen=self,eventmap=
 			{
-				iPlayableService.evUpdatedEventInfo: self.__eventInfoChanged
+				iPlayableService.evUpdatedEventInfo: self.__evUpdatedEventInfo,
+				iPlayableService.evVideoSizeChanged: self.__evVideoSizeChanged,
 			})
+		session.nav.record_event.append(self.gotRecordEvent)
+		self.mp3Available = False
+		self.dolbyAvailable = False
 
-	def __eventInfoChanged(self):
+	def __evUpdatedEventInfo(self):
 		if Screens.Standby.inStandby:
 			return
-		service = self.session.nav.getCurrentService()
-		info = service and service.info()
-		if info is None:
-			vfdtext = "---"
+		if config.plugins.VFD_spark.textMode.value == 'ChNumber':
+			vfdtext = self.getChannelNr()
+		elif config.plugins.VFD_spark.textMode.value == 'ChName':
+			vfdtext = self.getChannelName()
 		else:
-			if config.plugins.VFD_spark.textMode.value == 'ChNumber':
-				vfdtext = self.getchannelnr()
-			elif config.plugins.VFD_spark.textMode.value == 'ChName':
-				vfdtext = info.getName().replace('\xc2\x86', '').replace('\xc2\x87', '')
-			else:
-				vfdtext = "---"
-		info = None
-		service = None
+			vfdtext = "---"
 		evfd.getInstance().vfd_write_string(vfdtext)
+		self.checkAudioTracks()
+		self.showCrypted()
+		self.showDolby()
+		self.showMp3()
 
-	def getchannelnr(self):
+	def __evVideoSizeChanged(self):
+                if Screens.Standby.inStandby:
+                        return
+		service=self.session.nav.getCurrentService()
+		if service is not None:
+			info=service.info()
+			height = info and info.getInfo(iServiceInformation.sVideoHeight) or -1
+			if height > 576 : #set HD symbol
+				evfd.getInstance().vfd_set_icon(0x11,1)
+			else:
+				evfd.getInstance().vfd_set_icon(0x11,0)
+
+	def getChannelNr(self):
 		if InfoBar.instance is None:
 			chnr = "---"
 			return chnr
@@ -88,21 +102,89 @@ class Channelnumber:
 		#################################################
 		return CentChnr
 
+	def getChannelName(self):
+		servicename = ""
+		currPlay = self.session.nav.getCurrentService()
+		if currPlay != None and self.mp3Available:
+			# show the MP3 tag
+			servicename = currPlay.info().getInfoString(iServiceInformation.sTagTitle)
+		else:
+			# show the service name
+			self.service = self.session.nav.getCurrentlyPlayingServiceReference()
+			if not self.service is None:
+				service = self.service.toCompareString()
+				servicename = ServiceReference.ServiceReference(service).getServiceName().replace('\xc2\x87', '').replace('\xc2\x86', '').ljust(16)
+				subservice = self.service.toString().split("::")
+				if subservice[0].count(':') == 9:
+					servicename = subservice[1].replace('\xc2\x87', '').replace('\xc3\x9f', 'ss').replace('\xc2\x86', '').ljust(16)
+				else:
+					servicename=servicename
+			else:
+				servicename="---"
+		return servicename
+
+	def showCrypted(self):
+		service=self.session.nav.getCurrentService()
+		if service is not None:
+			info=service.info()
+			crypted = info and info.getInfo(iServiceInformation.sIsCrypted) or -1
+			if crypted == 1 : #set crypt symbol
+				evfd.getInstance().vfd_set_icon(0x13,1)
+			else:
+				evfd.getInstance().vfd_set_icon(0x13,0)
+
+	def checkAudioTracks(self):
+		self.dolbyAvailable = False
+		self.mp3Available = False
+		service=self.session.nav.getCurrentService()
+		if service is not None:
+			audio = service.audioTracks()
+			if audio:
+				n = audio.getNumberOfTracks()
+				for x in range(n):
+					i = audio.getTrackInfo(x)
+					description = i.getDescription();
+					if description.find("MP3") != -1:
+						self.mp3Available = True
+					if description.find("AC3") != -1 or description.find("DTS") != -1:
+						self.dolbyAvailable = True
+
+	def showDolby(self):
+		if self.dolbyAvailable:
+			evfd.getInstance().vfd_set_icon(0x17,1)
+		else:
+			evfd.getInstance().vfd_set_icon(0x17,0)
+
+	def showMp3(self):
+		if self.mp3Available:
+			evfd.getInstance().vfd_set_icon(0x15,1)
+		else:
+			evfd.getInstance().vfd_set_icon(0x15,0)
+
+	def gotRecordEvent(self, service, event):
+		recs = self.session.nav.getRecordings()
+		nrecs = len(recs)
+		if nrecs > 0: #set rec symbol
+			evfd.getInstance().vfd_set_icon(0x1e,1)
+		else:
+			evfd.getInstance().vfd_set_icon(0x1e,0)
+
 ChannelnumberInstance = None
 
 def leaveStandby():
 	print "[VFD-SPARK] Leave Standby"
 	evfd.getInstance().vfd_write_string("....")
 	if config.plugins.VFD_spark.ledMode.value == 'True':
-		evfd.getInstance().vfd_set_led(False)
+		evfd.getInstance().vfd_set_led(0)
 
 def standbyCounterChanged(configElement):
 	print "[VFD-SPARK] In Standby"
 	from Screens.Standby import inStandby
 	inStandby.onClose.append(leaveStandby)
 	evfd.getInstance().vfd_clear_string()
+	evfd.getInstance().vfd_clear_icons()
 	if config.plugins.VFD_spark.ledMode.value == 'True':
-		evfd.getInstance().vfd_set_led(True)
+		evfd.getInstance().vfd_set_led(1)
 
 def setTime():
 	clock=int(time())
@@ -111,7 +193,7 @@ def setTime():
 def initVFD():
 	print "[VFD-SPARK] initVFD"
 	evfd.getInstance().vfd_write_string("....")
-	evfd.getInstance().vfd_set_led(False)
+	evfd.getInstance().vfd_set_led(0)
 	setTime()
 
 class VFD_SparkSetup(ConfigListScreen, Screen):
