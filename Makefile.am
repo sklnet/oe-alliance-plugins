@@ -51,7 +51,7 @@ SUBDIRS += XtrendRemote SF8VFDControl
 endif
 
 if SPARK
-SUBDIRS += SparkVFDControl
+SUBDIRS += SparkVFDControl HbbTV
 endif
 
 if HAVE_TEMPFANCONTROL
