@@ -2,6 +2,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager WebBrowser OpenUitzendingGemist TunerServer OnDemand Fempa
 
+if AZBOX
+SUBDIRS += Blindscan
+endif
+
 if VUPLUS
 SUBDIRS += VuplusEvent HbbTV
 endif
@@ -22,8 +26,16 @@ if VENTON
 SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade HbbTV
 endif
 
+if INI
+SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade HbbTV
+endif
+
+if INIHDP
+SUBDIRS += TransCodingSetup
+endif
+
 if VUUNO
-SUBDIRS += FPGAUpgrade Blindscan VuRemote
+SUBDIRS += FirmwareUpgrade Blindscan VuRemote
 endif
 
 if VUULTIMO
@@ -35,7 +47,7 @@ SUBDIRS += VuDuoFanControl
 endif
 
 if VUSOLO2
-SUBDIRS += FPGAUpgrade VuRemote TransCodingSetup Blindscan
+SUBDIRS += FirmwareUpgrade VuRemote TransCodingSetup Blindscan
 endif
 
 if VUDUO2
