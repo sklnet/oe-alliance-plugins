@@ -36,37 +36,50 @@ AM_CONDITIONAL(VUPLUS, test `echo "$BOXTYPE" | cut -b 1-2` == "vu")
 AM_CONDITIONAL(XTREND, test `echo "$BOXTYPE" | cut -b 1-2` == "et")
 AM_CONDITIONAL(TECHNOMATE, test `echo "$BOXTYPE" | cut -b 1-2` == "tm")
 AM_CONDITIONAL(IQON, test `echo "$BOXTYPE" | cut -b 1-4` == "iqon")
+AM_CONDITIONAL(INI, test `echo "$BOXTYPE" | cut -b 1-3` == "ini")
 AM_CONDITIONAL(GIGABLUE, test `echo "$BOXTYPE" | cut -b 1-2` == "gb")
 AM_CONDITIONAL(ODIN, test `echo "$BOXTYPE" | cut -b 1-4` == "odin")
+AM_CONDITIONAL(EDISION, test `echo "$BOXTYPE" | cut -b 1-7` == "edision")
+AM_CONDITIONAL(JEPSSEN, test `echo "$BOXTYPE" | cut -b 1-7` == "jepssen")
 AM_CONDITIONAL(VENTON, test `echo "$BOXTYPE" | cut -b 1-6` == "venton")
-AM_CONDITIONAL(INI, test `echo "$BOXTYPE" | cut -b 1-3` == "ini")
-AM_CONDITIONAL(VUUNO, test "$BOXTYPE" == vuuno)
-AM_CONDITIONAL(VUULTIMO, test "$BOXTYPE" == vuultimo)
-AM_CONDITIONAL(VUSOLO, test "$BOXTYPE" == vusolo)
-AM_CONDITIONAL(VUDUO2, test "$BOXTYPE" == vuduo2)
-AM_CONDITIONAL(VUSOLO2, test "$BOXTYPE" == vusolo2)
-AM_CONDITIONAL(VUDUO, test "$BOXTYPE" == vuduo)
+AM_CONDITIONAL(DM8000, test "$BOXTYPE" == dm8000)
+AM_CONDITIONAL(DM7020HD, test "$BOXTYPE" == dm7020hd)
+AM_CONDITIONAL(DM800, test "$BOXTYPE" == dm800)
+AM_CONDITIONAL(DM800SE, test "$BOXTYPE" == dm800se)
+AM_CONDITIONAL(DM800HD, test "$BOXTYPE" == dm800hd)
+AM_CONDITIONAL(EBOX5000, test "$BOXTYPE" == ebox5000)
 AM_CONDITIONAL(ET4X00, test "$BOXTYPE" == et4x00)
 AM_CONDITIONAL(ET5X00, test "$BOXTYPE" == et5x00)
 AM_CONDITIONAL(ET6X00, test "$BOXTYPE" == et6x00)
 AM_CONDITIONAL(ET9X00, test "$BOXTYPE" == et9x00)
-AM_CONDITIONAL(ODINM7, test "$BOXTYPE" == odinm7)
-AM_CONDITIONAL(ODINM9, test "$BOXTYPE" == odinm9)
-AM_CONDITIONAL(TMTWIN, test "$BOXTYPE" == tmtwin)
-AM_CONDITIONAL(TM2T, test "$BOXTYPE" == tm2t)
-AM_CONDITIONAL(TMSINGLE, test "$BOXTYPE" == tmsingle)
-AM_CONDITIONAL(TMNANO, test "$BOXTYPE" == tmnano)
-AM_CONDITIONAL(IQONIOS100HD, test "$BOXTYPE" == iqonios100hd)
-AM_CONDITIONAL(IQONIOS200HD, test "$BOXTYPE" == iqonios200hd)
-AM_CONDITIONAL(IQONIOS300HD, test "$BOXTYPE" == iqonios300hd)
 AM_CONDITIONAL(GB800SOLO, test "$BOXTYPE" == gb800solo)
 AM_CONDITIONAL(GB800SE, test "$BOXTYPE" == gb800se)
 AM_CONDITIONAL(GB800UE, test "$BOXTYPE" == gb800ue)
 AM_CONDITIONAL(GBQUAD, test "$BOXTYPE" == gbquad)
-AM_CONDITIONAL(IXUSSONE, test "$BOXTYPE" == ixussone)
-AM_CONDITIONAL(VENTONHDX, test "$BOXTYPE" == ventonhdx)
 AM_CONDITIONAL(INIHDE, test "$BOXTYPE" == inihde)
 AM_CONDITIONAL(INIHDP, test "$BOXTYPE" == inihdp)
+AM_CONDITIONAL(IQONIOS100HD, test "$BOXTYPE" == iqonios100hd)
+AM_CONDITIONAL(IQONIOS200HD, test "$BOXTYPE" == iqonios200hd)
+AM_CONDITIONAL(IQONIOS300HD, test "$BOXTYPE" == iqonios300hd)
+AM_CONDITIONAL(IXUSSONE, test "$BOXTYPE" == ixussone)
+AM_CONDITIONAL(IXUSSZERO, test "$BOXTYPE" == ixusszero)
+AM_CONDITIONAL(MEDIABOX, test "$BOXTYPE" == mediabox)
+AM_CONDITIONAL(ODINM6, test "$BOXTYPE" == odinm6)
+AM_CONDITIONAL(ODINM7, test "$BOXTYPE" == odinm7)
+AM_CONDITIONAL(ODINM9, test "$BOXTYPE" == odinm9)
+AM_CONDITIONAL(OPTIMUSSOS1, test "$BOXTYPE" == optimussos1)
+AM_CONDITIONAL(OPTIMUSSOS2, test "$BOXTYPE" == optimussos2)
+AM_CONDITIONAL(TMTWINOE, test "$BOXTYPE" == tmtwin)
+AM_CONDITIONAL(TM2TOE, test "$BOXTYPE" == tm2t)
+AM_CONDITIONAL(TMSINGLE, test "$BOXTYPE" == tmsingle)
+AM_CONDITIONAL(TMNANO, test "$BOXTYPE" == tmnano)
+AM_CONDITIONAL(VUUNO, test "$BOXTYPE" == vuuno)
+AM_CONDITIONAL(VUULTIMO, test "$BOXTYPE" == vuultimo)
+AM_CONDITIONAL(VUSOLO, test "$BOXTYPE" == vusolo)
+AM_CONDITIONAL(VUDUO, test "$BOXTYPE" == vuduo)
+AM_CONDITIONAL(VUSOLO2, test "$BOXTYPE" == vusolo2)
+AM_CONDITIONAL(VUDUO2, test "$BOXTYPE" == vuduo2)
+AM_CONDITIONAL(VENTONHDX, test "$BOXTYPE" == ventonhdx)
 AM_CONDITIONAL(XP1000, test "$BOXTYPE" == xp1000)
 AM_CONDITIONAL(SPARK, test "$BOXTYPE" == spark)
 AM_CONDITIONAL(SPARK, test "$BOXTYPE" == spark7162)
@@ -166,6 +179,11 @@ HbbTV/src/Makefile
 HbbTV/meta/Makefile
 HbbTV/po/Makefile
 
+INIVFDControl/Makefile
+INIVFDControl/src/Makefile
+INIVFDControl/meta/Makefile
+INIVFDControl/po/Makefile
+
 LCD4linux/Makefile
 LCD4linux/src/Makefile
 LCD4linux/src/data/Makefile
@@ -198,6 +216,10 @@ OnDemand/src/Makefile
 OnDemand/src/icons/Makefile
 OnDemand/meta/Makefile
 OnDemand/po/Makefile
+
+RemoteChannelStreamConverter/Makefile
+RemoteChannelStreamConverter/src/Makefile
+RemoteChannelStreamConverter/po/Makefile
 
 TempFanControl/Makefile
 TempFanControl/src/Makefile

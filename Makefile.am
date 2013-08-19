@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager WebBrowser OpenUitzendingGemist TunerServer OnDemand Fempa
+SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager OpenUitzendingGemist TunerServer OnDemand Fempa RemoteChannelStreamConverter
 
 if AZBOX
 SUBDIRS += Blindscan
@@ -22,12 +22,20 @@ if ODINM7
 SUBDIRS += OdinM7VFDControl
 endif
 
+if ODINM6
+SUBDIRS += OdinM7VFDControl
+endif
+
+if INIHDE
+SUBDIRS += INIVFDControl
+endif
+
 if VENTON
-SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade HbbTV
+SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
 endif
 
 if INI
-SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade HbbTV
+SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
 endif
 
 if INIHDP
@@ -56,6 +64,10 @@ endif
 
 if GIGABLUE
 SUBDIRS += GigaBlueVFDControl Blindscan
+endif
+
+if GBQUAD
+SUBDIRS += WebBrowser
 endif
 
 if XP1000
