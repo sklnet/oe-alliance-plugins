@@ -7,7 +7,7 @@ SUBDIRS += Blindscan
 endif
 
 if VUPLUS
-SUBDIRS += VuplusEvent HbbTV
+SUBDIRS += VuplusEvent HbbTV AudioEffect
 endif
 
 if XTREND
@@ -35,6 +35,10 @@ SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
 endif
 
 if INI
+SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
+endif
+
+if MIRACLEBOX
 SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
 endif
 

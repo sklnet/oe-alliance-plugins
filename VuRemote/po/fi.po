@@ -4,10 +4,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-29 16:40+0100\n"
-"PO-Revision-Date: 2012-05-18 01:41+0100\n"
-"Last-Translator: Andy Blackburn <andyblac@o2.co.uk>\n"
-"Language-Team: none\n"
+"POT-Creation-Date: 2013-11-18 12:09+0100\n"
+"PO-Revision-Date: 2013-11-19 04:04+0100\n"
+"Last-Translator: Rob van der Does <robvddoes@gmail.com>\n"
+"Language-Team: AndyBlac/TimoJ\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,24 +22,22 @@ msgid "Cancel"
 msgstr "Peruuta"
 
 msgid "FILE NOT EXIST : /proc/stb/fp/remote_code"
-msgstr ""
+msgstr "TIEDOSTOA EI LÖYDY : /proc/stb/fp/remote_code"
 
 msgid "Keep"
-msgstr ""
+msgstr "Käytä"
 
 msgid "Please change your remote mode"
-msgstr ""
+msgstr "Vaihda kaukosäätimen lähetyskoodi"
 
-msgid ""
-"Press and hold '2' & '7' until red LED is solid, then press 'Help', then "
-"press '000"
-msgstr ""
+msgid "Press and hold '2' & '7' until red LED is solid, then press 'Help', then press '000"
+msgstr "Paina ja pidä '2' ja '7' näppäimiä pohjassa kunnes punainen valo palaa jatkuvasti, paina sitten 'Help' ja sitten '000"
 
 msgid "Remote Control Code"
-msgstr ""
+msgstr "Kaukosäätimen koodi"
 
 msgid "Remote Control System Code"
-msgstr ""
+msgstr "Kaukosäätimen järjestelmäkoodi"
 
 #
 msgid "Restore"
@@ -50,10 +48,11 @@ msgid "Save"
 msgstr "Tallenna"
 
 msgid "Text support"
-msgstr ""
+msgstr "Tekstin tuki"
 
 msgid "Then choose 'Keep' within seconds"
-msgstr ""
+msgstr "Valitse sitten 'Käytä' ennen aikalaskurin loppumista"
 
-msgid "This Plugin only support for UNO/ULTIMO"
-msgstr ""
+msgid "This Plugin only supports"
+msgstr "Tämä lisäosa tukee vain  UNO/ULTIMO/Solo2/DUO2"
+

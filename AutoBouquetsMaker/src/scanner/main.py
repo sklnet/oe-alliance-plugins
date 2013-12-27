@@ -197,7 +197,10 @@ class AutoBouquetsMaker(Screen):
 	def doTune(self):
 		from Screens.Standby import inStandby
 		transponder = self.providers[self.currentAction]["transponder"]
-		nimList = nimmanager.getNimListOfType("DVB-S")
+		nimList = []
+		for nim in nimmanager.nim_slots:
+			if nim.isCompatible("DVB-S") and nim.config_mode not in ("loopthrough"):
+				nimList.append(nim.slot)
 		if len(nimList) == 0:
 			print>>log, "[AutoBouquetsMaker] No DVB-S NIMs founds"
 			self.showError(_('No DVB-S NIMs founds'))
@@ -298,9 +301,9 @@ class AutoBouquetsMaker(Screen):
 		dict = {}
 		self.frontend.getFrontendStatus(dict)
 		if dict["tuner_state"] == "TUNING":
-			print>>log, "TUNING"
+			print>>log, "[AutoBouquetsMaker] TUNING"
 		elif dict["tuner_state"] == "LOCKED":
-			print>>log, "ACQUIRING TSID/ONID"
+			print>>log, "[AutoBouquetsMaker] ACQUIRING TSID/ONID"
 			self.progresscurrent += 1
 			if not inStandby:
 				self["progress"].setValue(self.progresscurrent)
@@ -311,7 +314,7 @@ class AutoBouquetsMaker(Screen):
 			self.timer.start(100, 1)
 			return
 		elif dict["tuner_state"] == "LOSTLOCK" or dict["tuner_state"] == "FAILED":
-			print>>log, "FAILED"
+			print>>log, "[AutoBouquetsMaker] FAILED"
 
 		self.lockcounter += 1
 		if self.lockcounter > self.LOCK_TIMEOUT:
@@ -455,6 +458,7 @@ class AutoAutoBouquetsMakerTimer:
 		# If we're close enough, we're okay...
 		atLeast = 0
 		if wake - now < 60:
+			atLeast = 60
 			print>>log, "[AutoBouquetsMaker] AutoBouquetsMaker onTimer occured at", strftime("%c", localtime(now))
 			from Screens.Standby import inStandby
 			if not inStandby:
@@ -463,8 +467,7 @@ class AutoAutoBouquetsMakerTimer:
 				ybox.setTitle('Scheduled AutoBouquetsMaker.')
 			else:
 				self.doAutoBouquetsMaker(True)
-		else:
-			self.autobouquetsmakerdate(60)
+		self.autobouquetsmakerdate(atLeast)
 
 	def doAutoBouquetsMaker(self, answer):
 		now = int(time())
