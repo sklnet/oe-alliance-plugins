@@ -1,16 +1,12 @@
 <provider>
-	<name>Sky Scotland</name>
+	<name>Sky Republic Ireland</name>
 	<protocol>sky</protocol>
 	<transponder frequency="10802750" symbol_rate="22000000" polarization="0"
 		fec_inner="4" orbital_position="282" inversion="2" system="0"
 		modulation="1" roll_off="0" pilot="2" />
 	<configurations>
-		<configuration key="hd_border_scotland" bouquet="0x1006" region="0x24" namespace="0x11a0000">Border Scotland HD</configuration>
-		<configuration key="sd_border_scotland" bouquet="0x1002" region="0x24" namespace="0x11a0000">Border Scotland SD</configuration>
-		<configuration key="hd_scottish_west" bouquet="0x1006" region="0x25" namespace="0x11a0000">Scottish West HD</configuration>
-		<configuration key="sd_scottish_west" bouquet="0x1002" region="0x25" namespace="0x11a0000">Scottish West SD</configuration>
-		<configuration key="hd_scottish_east" bouquet="0x1006" region="0x26" namespace="0x11a0000">Scottish East HD</configuration>
-		<configuration key="sd_scottish_east" bouquet="0x1002" region="0x26" namespace="0x11a0000">Scottish East SD</configuration>
+			<configuration key="hd_republic_of_ireland" bouquet="0x1008" region="0x32" namespace="0x11a0000">Republic of Ireland HD</configuration>
+			<configuration key="sd_republic_of_ireland" bouquet="0x1004" region="0x32" namespace="0x11a0000">Republic of Ireland SD</configuration>
 	</configurations>
 	<sections>
 		<section number="101">Entertainment</section>
@@ -38,18 +34,11 @@
 	<!-- channelsontop affect only HD bouquets -->
 	<channelsontop>
 		<channel number="101" />
-		<channel number="142" />
-		<channel number="230" />
-		<channel number="171" />
+		<channel number="102" />
 	</channelsontop>
 	<!-- swapchannels affect only main bouquet (the normal version) -->
 	<swapchannels>
-		<filter bouquet="0x1006" region="0x24" />
-		<filter bouquet="0x1006" region="0x25" />
-		<filter bouquet="0x1006" region="0x26" />
-		<channel number="142" with="102" />
-		<channel number="230" with="104" />
-		<channel number="171" with="105" />
+		<filter bouquet="0x1008" region="0x32" />	
 	</swapchannels>
 	<servicehacks>
 <![CDATA[
@@ -68,19 +57,19 @@ for number in service["numbers"]:
 		new_numbers.append(number - 3000)
 	elif number > 999 or number < 100:
 		if service["channel_id"] > 1470 and service["channel_id"] < 1486:
-			new_numbers.append(service["channel_id"] - 471)
-			service["interactive_name"] = "Sky Sports Interactive " + str(service["channel_id"])
+				new_numbers.append(service["channel_id"] - 471)
+				service["interactive_name"] = "Sky Sports Interactive " + str(service["channel_id"])
 		elif service["channel_id"] > 2050 and service["channel_id"] < 2053:
-			new_numbers.append(service["channel_id"] - 1031)
-			service["interactive_name"] = "BBC Interactive " + str(service["channel_id"])
+				new_numbers.append(service["channel_id"] - 1031)
+				service["interactive_name"] = "BBC Interactive " + str(service["channel_id"])
 		elif service["channel_id"] > 3542 and service["channel_id"] < 3545:
-			new_numbers.append(service["channel_id"] - 2521)
-			service["interactive_name"] = "BBC Interactive " + str(service["channel_id"])
+				new_numbers.append(service["channel_id"] - 2521)
+				service["interactive_name"] = "BBC Interactive " + str(service["channel_id"])
 		elif service["channel_id"] > 4093 and service["channel_id"] < 4099:
-			new_numbers.append(service["channel_id"] - 3064)
-			service["interactive_name"] = "Sky Anytime " + str(service["channel_id"])
+				new_numbers.append(service["channel_id"] - 3064)
+				service["interactive_name"] = "Sky Anytime " + str(service["channel_id"])
 		else:
-			skip = True
+				skip = True
 		break
 	else:
 		new_numbers.append(number)

@@ -16,10 +16,7 @@ try:
 except:
 	distro=""
 
-if distro == "openvix":
-	config.misc.remotecontrol_text_support = ConfigYesNo(default = False)
-elif  distro == "openatv":
-	config.misc.remotecontrol_text_support = ConfigYesNo(default = True)	
+config.misc.remotecontrol_text_support = ConfigYesNo(default = True)	
 
 config.plugins.remotecontrolcode = ConfigSubsection()
 if fileExists("/proc/stb/info/vumodel"):
