@@ -32,7 +32,7 @@ def vfd_clear():
 	subprocess.Popen(shlex.split(cmd))
 
 def vfd_set_icon(icon, on):
-	cmd='/usr/bin/fp_control -i ' + str(icon) + str(on)
+	cmd='/usr/bin/fp_control -i ' + str(icon) + ' ' + str(on)
 	subprocess.Popen(shlex.split(cmd))
 
 def vfd_set_led(on):
