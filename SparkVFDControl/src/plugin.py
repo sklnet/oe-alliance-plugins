@@ -15,13 +15,33 @@ from Plugins.Plugin import PluginDescriptor
 from Components.ServiceEventTracker import ServiceEventTracker
 from Components.ServiceList import ServiceList
 from Screens.InfoBar import InfoBar
-from time import localtime, time
+from time import localtime, strftime
 import Screens.Standby
-from enigma import evfd
+import shlex, subprocess
 
 config.plugins.VFD_spark = ConfigSubsection()
 config.plugins.VFD_spark.ledMode = ConfigSelection(default = "True", choices = [("False",_("Led in Standby off")),("True",_("Led in Standby on"))])
-config.plugins.VFD_spark.textMode = ConfigSelection(default = "ChNumber", choices = [("ChNumber",_("Channel number")),("ChName",_("Channel name"))])
+config.plugins.VFD_spark.textMode = ConfigSelection(default = "ChName", choices = [("ChNumber",_("Channel number")),("ChName",_("Channel name"))])
+
+def vfd_write_string(text):
+	cmd='/usr/bin/fp_control -t "' + text + '"'
+	subprocess.Popen(shlex.split(cmd))
+
+def vfd_clear():
+	cmd='/usr/bin/fp_control -c'
+	subprocess.Popen(shlex.split(cmd))
+
+def vfd_set_icon(icon, on):
+	cmd='/usr/bin/fp_control -i ' + str(icon) + str(on)
+	subprocess.Popen(shlex.split(cmd))
+
+def vfd_set_led(on):
+	cmd='/usr/bin/fp_control -l 0 ' + str(on)
+	subprocess.Popen(shlex.split(cmd))
+
+def vfd_set_time():
+	cmd='/usr/bin/fp_control -s ' + strftime("%H:%M:%S %d-%m-%Y", localtime())
+	subprocess.Popen(shlex.split(cmd))
 
 class Channelnumber:
 
@@ -46,7 +66,7 @@ class Channelnumber:
 			vfdtext = self.getChannelName()
 		else:
 			vfdtext = "---"
-		evfd.getInstance().vfd_write_string(vfdtext)
+		vfd_write_string(vfdtext)
 		self.checkAudioTracks()
 		self.showCrypted()
 		self.showDolby()
@@ -60,9 +80,9 @@ class Channelnumber:
 			info=service.info()
 			height = info and info.getInfo(iServiceInformation.sVideoHeight) or -1
 			if height > 576 : #set HD symbol
-				evfd.getInstance().vfd_set_icon(0x11,1)
+				vfd_set_icon(0x11,1)
 			else:
-				evfd.getInstance().vfd_set_icon(0x11,0)
+				vfd_set_icon(0x11,0)
 
 	def getChannelNr(self):
 		if InfoBar.instance is None:
@@ -129,9 +149,9 @@ class Channelnumber:
 			info=service.info()
 			crypted = info and info.getInfo(iServiceInformation.sIsCrypted) or -1
 			if crypted == 1 : #set crypt symbol
-				evfd.getInstance().vfd_set_icon(0x13,1)
+				vfd_set_icon(0x13,1)
 			else:
-				evfd.getInstance().vfd_set_icon(0x13,0)
+				vfd_set_icon(0x13,0)
 
 	def checkAudioTracks(self):
 		self.dolbyAvailable = False
@@ -151,50 +171,45 @@ class Channelnumber:
 
 	def showDolby(self):
 		if self.dolbyAvailable:
-			evfd.getInstance().vfd_set_icon(0x17,1)
+			vfd_set_icon(0x17,1)
 		else:
-			evfd.getInstance().vfd_set_icon(0x17,0)
+			vfd_set_icon(0x17,0)
 
 	def showMp3(self):
 		if self.mp3Available:
-			evfd.getInstance().vfd_set_icon(0x15,1)
+			vfd_set_icon(0x15,1)
 		else:
-			evfd.getInstance().vfd_set_icon(0x15,0)
+			vfd_set_icon(0x15,0)
 
 	def gotRecordEvent(self, service, event):
 		recs = self.session.nav.getRecordings()
 		nrecs = len(recs)
 		if nrecs > 0: #set rec symbol
-			evfd.getInstance().vfd_set_icon(0x1e,1)
+			vfd_set_icon(0x1e,1)
 		else:
-			evfd.getInstance().vfd_set_icon(0x1e,0)
+			vfd_set_icon(0x1e,0)
 
 ChannelnumberInstance = None
 
 def leaveStandby():
 	print "[VFD-SPARK] Leave Standby"
-	evfd.getInstance().vfd_write_string("....")
+	vfd_write_string("....")
 	if config.plugins.VFD_spark.ledMode.value == 'True':
-		evfd.getInstance().vfd_set_led(0)
+		vfd_set_led(0)
 
 def standbyCounterChanged(configElement):
 	print "[VFD-SPARK] In Standby"
 	from Screens.Standby import inStandby
 	inStandby.onClose.append(leaveStandby)
-	evfd.getInstance().vfd_clear_string()
-	evfd.getInstance().vfd_clear_icons()
+	vfd_clear()
 	if config.plugins.VFD_spark.ledMode.value == 'True':
-		evfd.getInstance().vfd_set_led(1)
-
-def setTime():
-	clock=int(time())
-	evfd.getInstance().vfd_set_clock(clock)
+		vfd_set_led(1)
 
 def initVFD():
 	print "[VFD-SPARK] initVFD"
-	evfd.getInstance().vfd_write_string("....")
-	evfd.getInstance().vfd_set_led(0)
-	setTime()
+	vfd_write_string("....")
+	vfd_set_led(0)
+	vfd_set_time()
 
 class VFD_SparkSetup(ConfigListScreen, Screen):
 	def __init__(self, session, args = None):
@@ -278,7 +293,7 @@ class VFD_Spark:
 		self.onClose = [ ]
 		self.Console = Console()
 		initVFD()
-		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().append(setTime)
+		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().append(vfd_set_time)
 		global ChannelnumberInstance
 		if ChannelnumberInstance is None:
 			ChannelnumberInstance = Channelnumber(session)
@@ -288,7 +303,7 @@ class VFD_Spark:
 
 	def abort(self):
 		print "[VFD-SPARK] aborting"
-		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().remove(setTime)
+		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().remove(vfd_set_time)
 
 	config.misc.standbyCounter.addNotifier(standbyCounterChanged, initial_call = False)
 
