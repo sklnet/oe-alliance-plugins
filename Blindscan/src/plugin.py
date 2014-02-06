@@ -21,33 +21,11 @@ from Components.Pixmap import Pixmap
 from Tools.HardwareInfo import HardwareInfo
 from Tools.Directories import resolveFilename
 
-from enigma import eTimer, eDVBFrontendParametersSatellite, eComponentScan, eDVBSatelliteEquipmentControl, eDVBFrontendParametersTerrestrial, eDVBFrontendParametersCable, eConsoleAppContainer, eDVBResourceManager, getBoxType
+from enigma import eTimer, eDVBFrontendParametersSatellite, eComponentScan, eDVBSatelliteEquipmentControl, eDVBFrontendParametersTerrestrial, eDVBFrontendParametersCable, eConsoleAppContainer, eDVBResourceManager
 
-try:
-	from enigma import getImageVersionString, getBuildVersionString
-	versionstring = getImageVersionString()
-	buildstring = getBuildVersionString()
-except:
-	from Components.About import about
-	versionstring = about.getImageVersionString()
-	buildstring = about.getBuildVersionString()
-
-def getDistro():
-	try:
-		from enigma import getDistro as e2_getDistro
-		return e2_getDistro()
-	except:
-		try:
-			file = open('/etc/image-version', 'r')
-			lines = file.readlines()
-			file.close()
-			for x in lines:
-				splitted = x.split('=')
-				if splitted[0] == "comment":
-					result =  splitted[1].replace('\n','')
-		except:
-			result = None
-		return result
+from boxbranding import getBoxType, getImageVersion, getImageBuild
+versionstring = getImageVersion()
+buildstring = getImageBuild()
 
 #used for the XML file
 from time import strftime, time

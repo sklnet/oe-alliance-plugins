@@ -21,7 +21,8 @@ Version = "V3.9-r3"
 from __init__ import _
 from enigma import eConsoleAppContainer, eActionMap, iServiceInformation, iFrontendInformation, eDVBResourceManager, eDVBVolumecontrol
 from enigma import getDesktop, getEnigmaVersionString
-from enigma import ePicLoad, ePixmap, getBoxType
+from enigma import ePicLoad, ePixmap
+from boxbranding import getBoxType, getImageDistro
 
 from Screens.Screen import Screen
 from Plugins.Plugin import PluginDescriptor
@@ -11354,25 +11355,8 @@ def autostart(reason, **kwargs):
 			except:
 				pass
 
-def getDistro():
-	try:
-		from enigma import getDistro as e2_getDistro
-		return e2_getDistro()
-	except:
-		try:
-			file = open('/etc/image-version', 'r')
-			lines = file.readlines()
-			file.close()
-			for x in lines:
-				splitted = x.split('=')
-				if splitted[0] == "comment":
-					result =  splitted[1].replace('\n','')
-		except:
-			result = None
-		return result
-
 def setup(menuid, **kwargs):
-	if getDistro() in ("openvix", "openatv", "ventonsupport", "egami", "openhdf"):
+	if getImageDistro() in ("openvix", "openatv", "ventonsupport", "egami", "openhdf"):
 		if menuid == "display" and SystemInfo["Display"]:
 			return [("LCD4Linux", main, "lcd4linux", None)]
 		elif menuid == "system" and not SystemInfo["Display"]:
