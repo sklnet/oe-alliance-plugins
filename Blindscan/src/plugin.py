@@ -23,9 +23,11 @@ from Tools.Directories import resolveFilename
 
 from enigma import eTimer, eDVBFrontendParametersSatellite, eComponentScan, eDVBSatelliteEquipmentControl, eDVBFrontendParametersTerrestrial, eDVBFrontendParametersCable, eConsoleAppContainer, eDVBResourceManager
 
-from boxbranding import getBoxType, getImageVersion, getImageBuild
+from boxbranding import getBoxType, getImageVersion, getImageBuild, getBrandOEM
 versionstring = getImageVersion()
 buildstring = getImageBuild()
+boxtype = getBoxType()
+brandoem = getBrandOEM()
 
 #used for the XML file
 from time import strftime, time
@@ -454,7 +456,7 @@ class Blindscan(ConfigListScreen, Screen):
 				return "vuplus_%(TYPE)sblindscan"%{'TYPE':sType}, sName
 			except: pass
 			return "vuplus_blindscan", ""
-		if getBoxType().startswith('vu'):
+		if brandoem == 'vuplus':
 			self.binName,nimName =  GetCommand(self.scan_nims.value)
 
 			self.makeNimSocket(nimName)
@@ -562,20 +564,20 @@ class Blindscan(ConfigListScreen, Screen):
 			status_box_start_freq = temp_start_int_freq + uni_lnb_loc_osc[band]
 			status_box_end_freq = temp_end_int_freq + uni_lnb_loc_osc[band]
 			
-		if getBoxType().startswith('venton') or getBoxType().startswith('ini'):
+		if brandoem == 'ini':
 			cmd = "ini_blindscan %d %d %d %d %d %d %d %d" % (temp_start_int_freq, temp_end_int_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid)) 
-		elif getBoxType().startswith('vu'):
+		elif brandoem == 'vuplus':
 			try:
 				cmd = "%s %d %d %d %d %d %d %d %d" % (self.binName, temp_start_int_freq, temp_end_int_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid))
 			except: return
 
-		elif getBoxType().startswith('et'):
+		elif brandoem == 'xtrend':
 			cmd = "avl_xtrend_blindscan %d %d %d %d %d %d %d %d" % (temp_start_int_freq, temp_end_int_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid)) # commented out by Huevos cmd = "avl_xtrend_blindscan %d %d %d %d %d %d %d %d" % (self.blindscan_start_frequency.value/1000000, self.blindscan_stop_frequency.value/1000000, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid))
-		elif getBoxType().startswith('odin'):
+		elif brandoem == 'odin':
 			cmd = "odin_blindscan %d %d %d %d %d %d %d" % (self.feid, temp_start_int_freq, temp_end_int_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band]) # odin_blindscan tuner_idx min_frequency max_frequency min_symbolrate max_symbolrate polarization(Vertical & Horizontal) hilow_band
-		elif getBoxType().startswith('gb'):
+		elif brandoem == 'gigablue':
 			cmd = "gigablue_blindscan %d %d %d %d %d %d %d %d" % (temp_start_int_freq, temp_end_int_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid)) # commented out by Huevos cmd = "vuplus_blindscan %d %d %d %d %d %d %d %d" % (self.blindscan_start_frequency.value/1000000, self.blindscan_stop_frequency.value/1000000, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid))
-		elif getBoxType().startswith('azbox'):
+		elif brandoem == 'azbox':
 			cmd = "avl_azbox_blindscan %d %d %d %d %d %d %d %d" % (temp_start_int_freq, temp_end_int_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid)) # commented out by Huevos cmd = "avl_azbox_blindscan %d %d %d %d %d %d %d %d" % (self.blindscan_start_frequency.value/1000000, self.blindscan_stop_frequency.value/1000000, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value, tab_pol[pol], tab_hilow[band], self.feid, self.getNimSocket(self.feid))			
 			self.polsave=tab_pol[pol] # Data returned by the binary is not good we must save polarisation
 		print "prepared command : [%s]" % (cmd)
@@ -641,7 +643,7 @@ class Blindscan(ConfigListScreen, Screen):
 					pol = {	"HORIZONTAL" : parm.Polarisation_Horizontal,
 						"VERTICAL" : parm.Polarisation_Vertical}
 					parm.orbital_position = self.orb_position
-					if getBoxType().startswith('azbox'):
+					if brandoem == 'azbox':
 						parm.polarisation = self.polsave
 					else:
 						parm.polarisation = pol[data[1]]
@@ -868,7 +870,7 @@ class Blindscan(ConfigListScreen, Screen):
 		xml = ['<?xml version="1.0" encoding="iso-8859-1"?>\n\n']
 		xml.append('<!--\n')
 		xml.append('	File created on %s\n' % (strftime("%A, %d of %B %Y, %H:%M:%S")))
-		xml.append('	using %s receiver running Enigma2 image, version %s,\n' % (getBoxType(), versionstring))
+		xml.append('	using %s receiver running Enigma2 image, version %s,\n' % (boxtype, versionstring))
 		xml.append('	build %s, with the blindscan plugin \n\n' % (buildstring))
 		xml.append('	Search parameters:\n')
 		xml.append('		Tuner: %s\n' % (tuner[self.feid]))
