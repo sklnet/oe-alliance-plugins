@@ -34,19 +34,9 @@ from time import strftime, time
 
 XML_BLINDSCAN_DIR = "/tmp"
 
-_supportNimType = { 'AVL1208':'', 'AVL6222':'6222_', 'AVL6211':'6211_'}
+_supportNimType = { 'AVL1208':'', 'AVL6222':'6222_', 'AVL6211':'6211_', 'BCM7356':'bcm7346_'}
 
 class Blindscan(ConfigListScreen, Screen):
-	skin="""
-		<screen name="Blindscan" position="center,center" size="560,290" title="Blindscan">
-			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphatest="on" />
-			<ePixmap pixmap="skin_default/buttons/green.png" position="140,0" size="140,40" alphatest="on" />
-			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#9f1313" transparent="1" />
-			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-			<widget name="config" position="5,50" size="550,200" scrollbarMode="showOnDemand" />
-			<widget name="introduction" position="0,265" size="560,20" font="Regular;20" halign="center" />
-		</screen>
-		"""
 	def __init__(self, session):
 		Screen.__init__(self, session)
 		self.setup_title = _("Blindscan")
@@ -87,7 +77,7 @@ class Blindscan(ConfigListScreen, Screen):
 			}, -2)
 			self["key_red"] = StaticText(_("Exit"))
 			self["key_green"] = StaticText(_("Scan"))
-			self["introduction"] = Label(_("Press Green/OK to start the scan"))
+			self["footnote"] = Label(_("Press Green/OK to start the scan"))
 			self.createSetup()
 		else :
 			self["actions"] = ActionMap(["ColorActions", "SetupActions", 'DirectionActions'],
@@ -99,7 +89,7 @@ class Blindscan(ConfigListScreen, Screen):
 			}, -2)
 			self["key_red"] = StaticText(_("Exit"))
 			self["key_green"] = StaticText(" ")
-			self["introduction"] = Label(_("Please setup your tuner configuration."))
+			self["footnote"] = Label(_("Please setup your tuner configuration."))
 
 		self.i2c_mapping_table = None
 		self.nimSockets = self.ScanNimsocket()
@@ -124,9 +114,9 @@ class Blindscan(ConfigListScreen, Screen):
 		from Screens.Setup import SetupSummary
 		return SetupSummary
 
-	def ScanNimsocket(self):
+	def ScanNimsocket(self, filepath = '/proc/bus/nim_sockets'):
 		_nimSocket = {}
-		fp = file('/proc/bus/nim_sockets')
+		fp = file(filepath)
 
 		sNo, sName, sI2C = -1, "", -1
 		for line in fp:
@@ -139,9 +129,16 @@ class Blindscan(ConfigListScreen, Screen):
 				try:    sI2C = line.split()[1]
 				except: sI2C = -1
 			elif line.startswith('Name:'):
-				try:    sName = line.split()[3][4:-1]
+				splitLines = line.split()
+				try:
+					if splitLines[1].startswith('BCM'):
+						sName = splitLines[1]
+					else:
+						sName = splitLines[3][4:-1]
 				except: sName = ""
 			if sNo >= 0 and sName != "":
+				if sName.startswith('BCM'):
+					sI2C = sNo
 				if sI2C != -1:
 					_nimSocket[sNo] = [sName, sI2C]
 				else:	_nimSocket[sNo] = [sName]
@@ -163,10 +160,9 @@ class Blindscan(ConfigListScreen, Screen):
 		if is_exist_i2c: return
 
 		if nimname == "AVL6222":
-			model = file('/proc/stb/info/vumodel').read().strip()
-			if model == "uno":
+			if boxtype == "vuuno":
 				self.i2c_mapping_table = {0:3, 1:3, 2:1, 3:0}
-			elif model == "duo2":
+			elif boxtype == "vuduo2":
 				nimdata = self.nimSockets['0']
 				try:
 					if nimdata[0] == "AVL6222":
@@ -215,7 +211,8 @@ class Blindscan(ConfigListScreen, Screen):
 					self.session.pipshown = False
 					del self.session.pip
 					self.openFrontend()
-		if self.frontend == None :
+		print 'self.frontend:',self.frontend
+		if self.frontend == None:
 			self.session.open(MessageBox, _("Sorry, this tuner is in use."), MessageBox.TYPE_ERROR)
 			return False
 		self.tuner = Tuner(self.frontend)
@@ -603,7 +600,12 @@ class Blindscan(ConfigListScreen, Screen):
 			else:
 				display_pol = _("circular right")
 
-		tmpstr = _("Looking for available transponders.\nThis will take a short while.\n\n   Current Status : %d/%d\n   Satellite : %s\n   Polarization : %s\n   Frequency range : %d - %d MHz\n   Symbol rates : %d - %d MHz") %(self.running_count, self.max_count, orb[1], display_pol, status_box_start_freq, status_box_end_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value)
+		tmpmes = _("Current Status : %d/%d\n   Satellite : %s\n   Polarization : %s\n   Frequency range : %d - %d MHz\n   Symbol rates : %d - %d MHz") %(self.running_count, self.max_count, orb[1], display_pol, status_box_start_freq, status_box_end_freq, self.blindscan_start_symbol.value, self.blindscan_stop_symbol.value)
+		if boxtype == ('vusolo2'):
+			tmpmes2 = _("Looking for available transponders.\nThis will take a long time, please be patient.")
+		else:
+			tmpmes2 = _("Looking for available transponders.\nThis will take a short while.")
+		tmpstr = tmpmes + '\n\n' + tmpmes2 + '\n\n'
 		if is_scan :
 			self.blindscan_session = self.session.openWithCallback(self.blindscanSessionClose, MessageBox, tmpstr, MessageBox.TYPE_INFO)
 		else:
@@ -639,7 +641,8 @@ class Blindscan(ConfigListScreen, Screen):
 						"ROLLOFF_25" : parm.RollOff_alpha_0_25,
 						"ROLLOFF_35" : parm.RollOff_alpha_0_35}
 					pilot={ "PILOT_ON" : parm.Pilot_On,
-						"PILOT_OFF" : parm.Pilot_Off}
+						"PILOT_OFF" : parm.Pilot_Off,
+						"PILOT_AUTO" : parm.Pilot_Unknown}
 					pol = {	"HORIZONTAL" : parm.Polarisation_Horizontal,
 						"VERTICAL" : parm.Polarisation_Vertical}
 					parm.orbital_position = self.orb_position
@@ -861,7 +864,7 @@ class Blindscan(ConfigListScreen, Screen):
 		else :
 			pos_name = '%dE' % (abs(int(pos))/10)
 		location = '%s/blindscan_%s_%s.xml' %(save_xml_dir, pos_name, strftime("%d-%m-%Y_%H-%M-%S"))
-		tuner = ['A', 'B', 'C']
+		tuner = nimmanager.nim_slots[self.feid].friendly_full_description
 		polarisation = ['horizontal', 'vertical', 'circular left', 'circular right', 'vertical and horizontal', 'circular right and circular left']
 		adjacent = ['no', 'up to 1 degree', 'up to 2 degrees', 'up to 3 degrees']
 		known_txp = 'no'
@@ -873,7 +876,7 @@ class Blindscan(ConfigListScreen, Screen):
 		xml.append('	using %s receiver running Enigma2 image, version %s,\n' % (boxtype, versionstring))
 		xml.append('	build %s, with the blindscan plugin \n\n' % (buildstring))
 		xml.append('	Search parameters:\n')
-		xml.append('		Tuner: %s\n' % (tuner[self.feid]))
+		xml.append('		%s\n' % (tuner))
 		xml.append('		Satellite: %s\n' % (self.sat_name))
 		xml.append('		Start frequency: %dMHz\n' % (self.blindscan_start_frequency.value))
 		xml.append('		Stop frequency: %dMHz\n' % (self.blindscan_stop_frequency.value))
