@@ -39,9 +39,9 @@ def vfd_set_led(on):
 	cmd='/usr/bin/fp_control -l 0 ' + str(on)
 	subprocess.Popen(shlex.split(cmd))
 
-def vfd_set_time():
-	cmd='/usr/bin/fp_control -s ' + strftime("%H:%M:%S %d-%m-%Y", localtime())
-	subprocess.Popen(shlex.split(cmd))
+#def vfd_set_time():
+#	cmd='/usr/bin/fp_control -s ' + strftime("%H:%M:%S %d-%m-%Y", localtime())
+#	subprocess.Popen(shlex.split(cmd))
 
 class Channelnumber:
 
@@ -209,7 +209,7 @@ def initVFD():
 	print "[VFD-SPARK] initVFD"
 	vfd_write_string("....")
 	vfd_set_led(0)
-	vfd_set_time()
+#	vfd_set_time()
 
 class VFD_SparkSetup(ConfigListScreen, Screen):
 	def __init__(self, session, args = None):
@@ -293,7 +293,7 @@ class VFD_Spark:
 		self.onClose = [ ]
 		self.Console = Console()
 		initVFD()
-		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().append(vfd_set_time)
+#		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().append(vfd_set_time)
 		global ChannelnumberInstance
 		if ChannelnumberInstance is None:
 			ChannelnumberInstance = Channelnumber(session)
@@ -303,7 +303,7 @@ class VFD_Spark:
 
 	def abort(self):
 		print "[VFD-SPARK] aborting"
-		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().remove(vfd_set_time)
+#		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().remove(vfd_set_time)
 
 	config.misc.standbyCounter.addNotifier(standbyCounterChanged, initial_call = False)
 
