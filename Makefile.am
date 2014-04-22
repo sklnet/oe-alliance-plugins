@@ -71,7 +71,7 @@ SUBDIRS += FirmwareUpgrade VuRemote TransCodingSetup Blindscan
 endif
 
 if GIGABLUE
-SUBDIRS += GigaBlueVFDControl Blindscan
+SUBDIRS += GigaBlueVFDControl Blindscan AudioEffect
 endif
 
 if XP1000
@@ -84,4 +84,20 @@ endif
 
 if HAVE_TEMPFANCONTROL
 SUBDIRS += TempFanControl
+endif
+
+if GBQUADPLUS
+SUBDIRS += AudioEffect
+endif
+
+if GBQUAD
+SUBDIRS += AudioEffect
+endif
+
+if GB800SEPLUS
+SUBDIRS += AudioEffect
+endif
+
+if GB800UEPLUS
+SUBDIRS += AudioEffect
 endif

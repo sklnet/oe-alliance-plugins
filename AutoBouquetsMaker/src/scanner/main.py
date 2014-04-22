@@ -20,6 +20,8 @@ from manager import Manager
 from providerconfig import ProviderConfig
 from time import localtime, time, strftime, mktime
 
+from boxbranding import getMachineBrand, getMachineName
+
 from .. import log
 import os
 import sys
@@ -32,7 +34,7 @@ except:
 
 class AutoBouquetsMaker(Screen):
 	skin = """
-	<screen position="c-300,e-80" size="600,70" title="CrossEPG" flags="wfNoBorder" >
+	<screen position="c-300,e-80" size="600,70" flags="wfNoBorder" >
 		<widget name="background" position="0,0" size="600,70" zPosition="-1" />
 		<widget name="action" halign="center" valign="center" position="65,10" size="520,20" font="Regular;18" backgroundColor="#11404040" transparent="1" />
 		<widget name="status" halign="center" valign="center" position="65,35" size="520,20" font="Regular;18" backgroundColor="#11000000" transparent="1" />
@@ -503,7 +505,7 @@ class AutoAutoBouquetsMakerTimer:
 			print>>log, "[AutoBouquetsMaker] AutoBouquetsMaker onTimer occured at", strftime("%c", localtime(now))
 			from Screens.Standby import inStandby
 			if not inStandby:
-				message = _("Your STB_BOX is about to update your bouquets,\nDo you want to allow this?")
+				message = _("Your %s %s is about to update your bouquets,\nDo you want to allow this?") % (getMachineBrand(), getMachineName())
 				ybox = self.session.openWithCallback(self.doAutoBouquetsMaker, MessageBox, message, MessageBox.TYPE_YESNO, timeout = 30)
 				ybox.setTitle('Scheduled AutoBouquetsMaker.')
 			else:
@@ -514,7 +516,6 @@ class AutoAutoBouquetsMakerTimer:
 		now = int(time())
 		if answer is False:
 			if config.autobouquetsmaker.retrycount.value < 2:
-				print '[AutoBouquetsMaker] Number of retries',config.autobouquetsmaker.retrycount.value
 				print>>log, "[AutoBouquetsMaker] AutoBouquetsMaker delayed."
 				repeat = config.autobouquetsmaker.retrycount.value
 				repeat += 1
@@ -535,7 +536,6 @@ class AutoAutoBouquetsMakerTimer:
 			self.timer.start(100, 1)
 
 	def doautostartscan(self):
-		print 'STARTing'
 		self.session.open(AutoBouquetsMaker)
 
 	def doneConfiguring(self):
