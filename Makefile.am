@@ -22,27 +22,15 @@ if ODINM7
 SUBDIRS += OdinM7VFDControl
 endif
 
-if ODINM6
-SUBDIRS += OdinM7VFDControl
-endif
-
 if INIHDE
 SUBDIRS += INIVFDControl
 endif
 
-if ENFINITY
-SUBDIRS += EVOVFDControl
-endif
-
-if VENTON
-SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
+if EW7358
+SUBDIRS += EWVFDControl
 endif
 
 if INI
-SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
-endif
-
-if MIRACLEBOX
 SUBDIRS += VentonFancontrol Blindscan MICOMUpgrade
 endif
 

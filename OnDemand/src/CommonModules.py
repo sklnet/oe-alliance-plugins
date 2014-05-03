@@ -325,7 +325,7 @@ class StreamsThumbCommon(Screen):
 	TIMER_CMD_START = 0
 	TIMER_CMD_VKEY = 1
 
-	def __init__(self, session, action, value, url):
+	def __init__(self, session, action, value, url, name):
 		self.skin = """
 				<screen position="0,0" size="e,e" flags="wfNoBorder" >
 					<widget name="lab1" position="0,0" size="e,e" font="Regular;24" halign="center" valign="center" transparent="0" zPosition="5" />
@@ -334,6 +334,7 @@ class StreamsThumbCommon(Screen):
 				</screen>"""
 		self.session = session
 		Screen.__init__(self, session)
+		self.skinName = [name, "StreamsThumbCommon"]
 
 		self['lab1'] = Label(_('Wait please while gathering data...'))
 
