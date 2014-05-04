@@ -25,19 +25,23 @@ config.plugins.VFD_spark.textMode = ConfigSelection(default = "ChName", choices 
 
 def vfd_write_string(text):
 	cmd='/usr/bin/fp_control -t "' + text + '"'
-	subprocess.Popen(shlex.split(cmd))
+	fpc = subprocess.Popen(shlex.split(cmd))
+	fpc.wait()
 
 def vfd_clear():
 	cmd='/usr/bin/fp_control -c'
-	subprocess.Popen(shlex.split(cmd))
+	fpc = subprocess.Popen(shlex.split(cmd))
+	fpc.wait()
 
 def vfd_set_icon(icon, on):
 	cmd='/usr/bin/fp_control -i ' + str(icon) + ' ' + str(on)
-	subprocess.Popen(shlex.split(cmd))
+	fpc = subprocess.Popen(shlex.split(cmd))
+	fpc.wait()
 
 def vfd_set_led(on):
 	cmd='/usr/bin/fp_control -l 0 ' + str(on)
-	subprocess.Popen(shlex.split(cmd))
+	fpc = subprocess.Popen(shlex.split(cmd))
+	fpc.wait()
 
 #def vfd_set_time():
 #	cmd='/usr/bin/fp_control -s ' + strftime("%H:%M:%S %d-%m-%Y", localtime())
