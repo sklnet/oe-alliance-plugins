@@ -24,14 +24,17 @@ config.plugins.VFD_spark.ledMode = ConfigSelection(default = "True", choices = [
 config.plugins.VFD_spark.textMode = ConfigSelection(default = "ChName", choices = [("ChNumber",_("Channel number")),("ChName",_("Channel name"))])
 
 def vfd_write_string(text):
-	cmd='/usr/bin/fp_control -t "' + text + '"'
-	fpc = subprocess.Popen(shlex.split(cmd))
-	fpc.wait()
+	open("/dev/vfd", "w").write(text)
+#	cmd='/usr/bin/fp_control -t "' + text + '"'
+#	fpc = subprocess.Popen(shlex.split(cmd))
+#	fpc.wait()
 
 def vfd_clear():
-	cmd='/usr/bin/fp_control -c'
-	fpc = subprocess.Popen(shlex.split(cmd))
-	fpc.wait()
+	text='                '
+	vfd_write_string(text)
+#	cmd='/usr/bin/fp_control -c'
+#	fpc = subprocess.Popen(shlex.split(cmd))
+#	fpc.wait()
 
 def vfd_set_icon(icon, on):
 	cmd='/usr/bin/fp_control -i ' + str(icon) + ' ' + str(on)
