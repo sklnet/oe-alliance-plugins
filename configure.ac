@@ -189,6 +189,7 @@ LCD4linux/src/renderer/Makefile
 LCD4linux/src/wetter/Makefile
 LCD4linux/src/arm/Makefile
 LCD4linux/src/mips/Makefile
+LCD4linux/src/sh4/Makefile
 LCD4linux/meta/Makefile
 LCD4linux/po/Makefile
 
