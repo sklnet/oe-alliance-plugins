@@ -10,9 +10,5 @@ install_DATA = plugin.png History.txt
 if CUBE
 SUBDIRS += arm
 else
-if SPARK
-SUBDIRS += sh4
-else
 SUBDIRS += mips
-endif
 endif
