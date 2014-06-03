@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager OpenUitzendingGemist TunerServer OnDemand Fempa RemoteChannelStreamConverter
+SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager OpenUitzendingGemist TunerServer OnDemand Fempa LCD4linux RemoteChannelStreamConverter WirelessAccessPoint
 
 if AZBOX
 SUBDIRS += Blindscan
@@ -23,6 +23,14 @@ SUBDIRS += XtrendFancontrol Blindscan
 endif
 
 if ODINM7
+SUBDIRS += OdinM7VFDControl
+endif
+
+if ODINM7S
+SUBDIRS += OdinM7VFDControl
+endif
+
+if ODINM7C
 SUBDIRS += OdinM7VFDControl
 endif
 
@@ -59,6 +67,10 @@ SUBDIRS += VuDuoFanControl
 endif
 
 if VUSOLO2
+SUBDIRS += FirmwareUpgrade VuRemote TransCodingSetup Blindscan
+endif
+
+if VUSOLOSE
 SUBDIRS += FirmwareUpgrade VuRemote TransCodingSetup Blindscan
 endif
 
