@@ -25,30 +25,24 @@ config.plugins.VFD_spark.textMode = ConfigSelection(default = "ChName", choices 
 
 def vfd_write_string(text):
 	open("/dev/vfd", "w").write(text)
-#	cmd='/usr/bin/fp_control -t "' + text + '"'
-#	fpc = subprocess.Popen(shlex.split(cmd))
-#	fpc.wait()
 
 def vfd_clear():
-	text='                '
-	vfd_write_string(text)
-#	cmd='/usr/bin/fp_control -c'
-#	fpc = subprocess.Popen(shlex.split(cmd))
-#	fpc.wait()
+#	text='                '
+	vfd_write_string('                ')
 
 def vfd_set_icon(icon, on):
+#	text=str(on)+str(icon)
+#	open("/proc/led1_pattern", "w").write(text);
 	cmd='/usr/bin/fp_control -i ' + str(icon) + ' ' + str(on)
 	fpc = subprocess.Popen(shlex.split(cmd))
 	fpc.wait()
 
 def vfd_set_led(on):
+#        text=str(on)
+#        open("/proc/led0_pattern", "w").write(text);
 	cmd='/usr/bin/fp_control -l 0 ' + str(on)
 	fpc = subprocess.Popen(shlex.split(cmd))
 	fpc.wait()
-
-#def vfd_set_time():
-#	cmd='/usr/bin/fp_control -s ' + strftime("%H:%M:%S %d-%m-%Y", localtime())
-#	subprocess.Popen(shlex.split(cmd))
 
 class Channelnumber:
 
@@ -156,9 +150,9 @@ class Channelnumber:
 			info=service.info()
 			crypted = info and info.getInfo(iServiceInformation.sIsCrypted) or -1
 			if crypted == 1 : #set crypt symbol
-				vfd_set_icon(0x13,1)
+				vfd_set_icon(11,1)
 			else:
-				vfd_set_icon(0x13,0)
+				vfd_set_icon(11,0)
 
 	def checkAudioTracks(self):
 		self.dolbyAvailable = False
@@ -178,23 +172,23 @@ class Channelnumber:
 
 	def showDolby(self):
 		if self.dolbyAvailable:
-			vfd_set_icon(0x17,1)
+			vfd_set_icon(10,1)
 		else:
-			vfd_set_icon(0x17,0)
+			vfd_set_icon(10,0)
 
 	def showMp3(self):
 		if self.mp3Available:
-			vfd_set_icon(0x15,1)
+			vfd_set_icon(25,1)
 		else:
-			vfd_set_icon(0x15,0)
+			vfd_set_icon(25,0)
 
 	def gotRecordEvent(self, service, event):
 		recs = self.session.nav.getRecordings()
 		nrecs = len(recs)
 		if nrecs > 0: #set rec symbol
-			vfd_set_icon(0x1e,1)
+			vfd_set_icon(7,1)
 		else:
-			vfd_set_icon(0x1e,0)
+			vfd_set_icon(7,0)
 
 ChannelnumberInstance = None
 
