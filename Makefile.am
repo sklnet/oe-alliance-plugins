@@ -8,7 +8,6 @@ endif
 
 if HAVE_WIRELESSACCESSPOINT
 SUBDIRS += WirelessAccessPoint
->>>>>>> upstream/master
 endif
 
 if AZBOX
