@@ -1,17 +1,13 @@
 ACLOCAL_AMFLAGS = -I m4
 
-if SPARK
+SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager OpenUitzendingGemist TunerServer OnDemand Fempa RemoteChannelStreamConverter 
 
-SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager OpenUitzendingGemist TunerServer OnDemand Fempa RemoteChannelStreamConverter
-
-else
-
-SUBDIRS = AutoBouquetsMaker DLNABrowser DLNAServer StreamTV 3GModemManager OpenUitzendingGemist TunerServer OnDemand Fempa LCD4linux RemoteChannelStreamConverter 
+if HAVE_LCD
+SUBDIRS += LCD4linux
+endif
 
 if HAVE_WIRELESSACCESSPOINT
 SUBDIRS += WirelessAccessPoint
-endif
-
 endif
 
 if AZBOX
