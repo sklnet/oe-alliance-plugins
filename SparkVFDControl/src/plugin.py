@@ -81,9 +81,9 @@ class Channelnumber:
 			info=service.info()
 			height = info and info.getInfo(iServiceInformation.sVideoHeight) or -1
 			if height > 576 : #set HD symbol
-				vfd_set_icon(0x11,1)
+				vfd_set_icon(14,1)
 			else:
-				vfd_set_icon(0x11,0)
+				vfd_set_icon(14,0)
 
 	def getChannelNr(self):
 		if InfoBar.instance is None:
@@ -195,6 +195,7 @@ ChannelnumberInstance = None
 def leaveStandby():
 	print "[VFD-SPARK] Leave Standby"
 	vfd_write_string("....")
+	vfd_set_icon(36,1)
 	if config.plugins.VFD_spark.ledMode.value == 'True':
 		vfd_set_led(0)
 
