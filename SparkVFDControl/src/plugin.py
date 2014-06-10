@@ -27,7 +27,6 @@ def vfd_write_string(text):
 	open("/dev/vfd", "w").write(text)
 
 def vfd_clear():
-#	text='                '
 	vfd_write_string('                ')
 
 def vfd_set_icon(icon, on):
@@ -38,11 +37,8 @@ def vfd_set_icon(icon, on):
 	fpc.wait()
 
 def vfd_set_led(on):
-#        text=str(on)
-#        open("/proc/led0_pattern", "w").write(text);
-	cmd='/usr/bin/fp_control -l 0 ' + str(on)
-	fpc = subprocess.Popen(shlex.split(cmd))
-	fpc.wait()
+	text=str(on)+'0'
+        open("/proc/stb/fp/aotom_led", "w").write(text);
 
 class Channelnumber:
 
@@ -51,8 +47,7 @@ class Channelnumber:
 		self.onClose = [ ]
 		self.__event_tracker = ServiceEventTracker(screen=self,eventmap=
 			{
-				iPlayableService.evUpdatedEventInfo: self.__evUpdatedEventInfo,
-				iPlayableService.evVideoSizeChanged: self.__evVideoSizeChanged,
+				iPlayableService.evUpdatedEventInfo: self.__eventInfoChanged
 			})
 		session.nav.record_event.append(self.gotRecordEvent)
 		self.mp3Available = False
