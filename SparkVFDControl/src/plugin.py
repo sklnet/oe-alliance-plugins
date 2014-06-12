@@ -30,11 +30,8 @@ def vfd_clear():
 	vfd_write_string('                ')
 
 def vfd_set_icon(icon, on):
-#	text=str(on)+str(icon)
-#	open("/proc/led1_pattern", "w").write(text);
-	cmd='/usr/bin/fp_control -i ' + str(icon) + ' ' + str(on)
-	fpc = subprocess.Popen(shlex.split(cmd))
-	fpc.wait()
+	text=str(on)+str(icon)
+	open("/proc/stb/fp/aotom_icon", "w").write(text);
 
 def vfd_set_led(on):
 	text=str(on)+'0'
@@ -48,12 +45,13 @@ class Channelnumber:
 		self.__event_tracker = ServiceEventTracker(screen=self,eventmap=
 			{
 				iPlayableService.evUpdatedEventInfo: self.__eventInfoChanged
+				iPlayableService.evVideoSizeChanged: self.__videoSizeChanged,
 			})
 		session.nav.record_event.append(self.gotRecordEvent)
 		self.mp3Available = False
 		self.dolbyAvailable = False
 
-	def __evUpdatedEventInfo(self):
+	def __eventInfoChanged(self):
 		if Screens.Standby.inStandby:
 			return
 		if config.plugins.VFD_spark.textMode.value == 'ChNumber':
@@ -68,7 +66,7 @@ class Channelnumber:
 		self.showDolby()
 		self.showMp3()
 
-	def __evVideoSizeChanged(self):
+	def __videoSizeChanged(self):
                 if Screens.Standby.inStandby:
                         return
 		service=self.session.nav.getCurrentService()
