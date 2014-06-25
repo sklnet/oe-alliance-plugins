@@ -27,11 +27,11 @@ def vfd_write_string(text):
 	open("/dev/vfd", "w").write(text)
 
 def vfd_set_icon(icon, on):
-	text='i'+str(on)+str(icon)+'\0'
+	text='i'+str(on)+str(icon)+' '
 	open("/proc/stb/fp/aotom", "w").write(text);
 
 def vfd_set_led(on):
-	text='l'+str(on)+'0'+'\0'
+	text='l'+str(on)+'0'+' '
         open("/proc/stb/fp/aotom", "w").write(text);
 
 def vfd_clear():
@@ -45,7 +45,7 @@ class Channelnumber:
 		self.onClose = [ ]
 		self.__event_tracker = ServiceEventTracker(screen=self,eventmap=
 			{
-				iPlayableService.evUpdatedEventInfo: self.__eventInfoChanged,
+				iPlayableService.evUpdatedInfo: self.__eventInfoChanged,
 				iPlayableService.evVideoSizeChanged: self.__videoSizeChanged
 			})
 		session.nav.record_event.append(self.gotRecordEvent)
