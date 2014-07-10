@@ -16,7 +16,7 @@ class UnionTunerType(Screen, ConfigListScreen):
         self.session = session
         Screen.__init__(self, self.session)
         self.skinName = ['Setup']
-        self.setTitle(_('Amiko alien2 select tuner mode'))
+        self.setTitle(_('Spark7162 select tuner mode'))
         self['actions'] = ActionMap(['SetupActions', 'ColorActions'], {'cancel': self.cancel,
          'ok': self.ok,
          'green': self.ok,
@@ -79,4 +79,4 @@ def menu(menuid, **kwargs):
 
 
 def Plugins(**kwargs):
-    return PluginDescriptor(name=_('UnionTunerType config'), description='Select amiko alien2 dvb-t/c tuner mode', where=PluginDescriptor.WHERE_MENU, fnc=menu)
+    return PluginDescriptor(name=_('UnionTunerType config'), description='Select spark7162 dvb-t/c tuner mode', where=PluginDescriptor.WHERE_MENU, fnc=menu)
