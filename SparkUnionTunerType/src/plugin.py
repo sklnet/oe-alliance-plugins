@@ -8,7 +8,7 @@ from Components.Sources.StaticText import StaticText
 from Plugins.Plugin import PluginDescriptor
 from os import path as os_path
 option = 'options spark7162 UnionTunerType='
-filename = '/etc/modprobe.d/spark7162.conf'
+filename = '/etc/modprobe.d/_spark7162.conf'
 
 class UnionTunerType(Screen, ConfigListScreen):
 
