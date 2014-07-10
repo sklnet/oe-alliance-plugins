@@ -292,5 +292,9 @@ SparkVFDControl/src/Makefile
 SparkVFDControl/meta/Makefile
 SparkVFDControl/po/Makefile
 
+SparkUnionTunerType/Makefile
+SparkUnionTunerType/src/Makefile
+SparkUnionTunerType/meta/Makefile
+
 ])
 AC_OUTPUT
