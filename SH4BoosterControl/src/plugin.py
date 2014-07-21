@@ -15,14 +15,14 @@ from boxbranding import getMachineBuild
 import Screens.Standby
 
 config.plugins.booster = ConfigSubsection()
-if getMachineBuild() in ("spark7162"):
-	config.plugins.booster.startfrequenz = ConfigSelection(default = "4609", choices = [('4609',_("540 (default)")),('5377',"630"),('18179',"710"),('39686',"775"),('20483',"800")])
-	config.plugins.booster.normalfrequenz = ConfigSelection(default = "4609", choices = [('4609',_("540 (default)")),('5377',"630"),('18179',"710"),('39686',"775"),('20483',"800")])
-	config.plugins.booster.standbyfrequenz = ConfigSelection(default = "4609", choices = [('4609',_("540 (default)")),('2561',"300"),('5123',"200")])
-else:
+if getMachineBuild() in ("spark"):
 	config.plugins.booster.startfrequenz = ConfigSelection(default = "3841", choices = [('3841',_("450 (default)")),('12803',"500"),('4609',"550"),('5121',"600"),('16643',"650"),('17923',"700")])
 	config.plugins.booster.normalfrequenz = ConfigSelection(default = "3841", choices = [('3841',_("450 (default)")),('12803',"500"),('4609',"550"),('5121',"600"),('16643',"650"),('17923',"700")])
 	config.plugins.booster.standbyfrequenz = ConfigSelection(default = "3841", choices = [('3841',_("450 (default)")),('2561',"300"),('5123',"200")])
+else:
+	config.plugins.booster.startfrequenz = ConfigSelection(default = "4609", choices = [('4609',_("540 (default)")),('5377',"630"),('18179',"710"),('39686',"775"),('20483',"800")])
+	config.plugins.booster.normalfrequenz = ConfigSelection(default = "4609", choices = [('4609',_("540 (default)")),('5377',"630"),('18179',"710"),('39686',"775"),('20483',"800")])
+	config.plugins.booster.standbyfrequenz = ConfigSelection(default = "4609", choices = [('4609',_("540 (default)")),('2561',"300"),('5123',"200")])
 
 def leaveStandby():
 	print "[SH4BoosterControl] Leave Standby"
