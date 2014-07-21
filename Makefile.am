@@ -99,7 +99,7 @@ SUBDIRS += XtrendRemote SF8VFDControl
 endif
 
 if SPARK
-SUBDIRS += SparkVFDControl SparkUnionTunerType
+SUBDIRS += SparkVFDControl SparkUnionTunerType SH4BoosterControl
 endif
 
 if HAVE_TEMPFANCONTROL
@@ -121,3 +121,4 @@ endif
 if GB800UEPLUS
 SUBDIRS += AudioEffect
 endif
+

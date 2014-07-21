@@ -222,6 +222,11 @@ RemoteChannelStreamConverter/Makefile
 RemoteChannelStreamConverter/src/Makefile
 RemoteChannelStreamConverter/po/Makefile
 
+SH4BoosterControl/Makefile
+SH4BoosterControl/src/Makefile
+SH4BoosterControl/meta/Makefile
+SH4BoosterControl/po/Makefile
+
 TempFanControl/Makefile
 TempFanControl/src/Makefile
 TempFanControl/meta/Makefile
