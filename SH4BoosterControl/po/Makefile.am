@@ -1,4 +1,4 @@
 PLUGIN = SH4BoosterControl
-CATEGORY ?= "Extensions"
+CATEGORY ?= "SystemPlugins"
 
 include $(top_srcdir)/Rules_noxml-po.mak
