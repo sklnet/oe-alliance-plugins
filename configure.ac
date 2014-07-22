@@ -227,6 +227,11 @@ SH4BoosterControl/src/Makefile
 SH4BoosterControl/meta/Makefile
 SH4BoosterControl/po/Makefile
 
+SH4OSDAdjustment/Makefile
+SH4OSDAdjustment/src/Makefile
+SH4OSDAdjustment/meta/Makefile
+SH4OSDAdjustment/po/Makefile
+
 TempFanControl/Makefile
 TempFanControl/src/Makefile
 TempFanControl/meta/Makefile
