@@ -332,7 +332,7 @@ def main(session, **kwargs):
 
 
 def menu(menuid, **kwargs):
-    if menuid == 'setup':
+    if menuid == 'osd_menu':
         return [(_('OSD Adjustment'),
           main,
           'OSD_Adjustment',
