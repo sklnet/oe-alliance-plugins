@@ -2,86 +2,72 @@
 from . import _
 
 from Screens.Screen import Screen
+from Plugins.Plugin import PluginDescriptor
 from Components.Console import Console
 from Components.Button import Button
 from Components.ActionMap import ActionMap
-from Components.config import config, configfile, ConfigSubsection, ConfigEnableDisable, getConfigListEntry, ConfigInteger, ConfigSelection, ConfigYesNo
-from Components.ConfigList import ConfigListScreen, ConfigList
-from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-import ServiceReference
-from enigma import iPlayableService, eServiceCenter, eTimer, eDVBLocalTimeHandler, iServiceInformation
-from os import system
-from Plugins.Plugin import PluginDescriptor
+from Components.ConfigList import ConfigList
+from Components.config import config, configfile, ConfigSubsection, getConfigListEntry, ConfigSelection
+from Components.ConfigList import ConfigListScreen
+from enigma import iPlayableService, eServiceCenter, eTimer, eActionMap
 from Components.ServiceEventTracker import ServiceEventTracker
 from Components.ServiceList import ServiceList
 from Screens.InfoBar import InfoBar
-from time import localtime, strftime
+from time import localtime, time
+from Tools.Directories import fileExists
+
+from boxbranding import getBoxType
+
 import Screens.Standby
-import shlex, subprocess
 
 config.plugins.VFD_spark = ConfigSubsection()
-config.plugins.VFD_spark.ledMode = ConfigSelection(default = "True", choices = [("False",_("Led in Standby off")),("True",_("Led in Standby on"))])
-config.plugins.VFD_spark.textMode = ConfigSelection(default = "ChName", choices = [("ChNumber",_("Channel number")),("ChName",_("Channel name"))])
+config.plugins.VFD_spark.showClock = ConfigSelection(default = "True_Switch", choices = [("False",_("Channelnumber in Standby off")),("True",_("Channelnumber in Standby Clock")), ("True_Switch",_("Channelnumber/Clock in Standby Clock")),("True_All",_("Clock always")),("Off",_("Always off"))])
+config.plugins.VFD_spark.timeMode = ConfigSelection(default = "24h", choices = [("12h"),("24h")])
 
-def vfd_write_string(text):
-	open("/dev/vfd", "w").write(text)
-
-def vfd_set_icon(icon, on):
-	text='i'+str(on)+str(icon)+' '
-	open("/proc/stb/fp/aotom", "w").write(text);
-
-def vfd_set_led(on):
-	text='l'+str(on)+'0'+' '
-        open("/proc/stb/fp/aotom", "w").write(text);
-
-def vfd_clear():
-        vfd_write_string('                ')
-        vfd_set_icon(46,0)
+def vfd_write(text):
+	open("/dev/dbox/oled0", "w").write(text)
 
 class Channelnumber:
 
 	def __init__(self, session):
 		self.session = session
+		self.sign = 0
+		self.updatetime = 10000
+		self.blink = False
+		self.channelnrdelay = 15
+		self.begin = int(time())
+		self.endkeypress = True
+		eActionMap.getInstance().bindAction('', -0x7FFFFFFF, self.keyPressed)
+		self.zaPrik = eTimer()
+		self.zaPrik.timeout.get().append(self.vrime)
+		self.zaPrik.start(1000, 1)
 		self.onClose = [ ]
+
 		self.__event_tracker = ServiceEventTracker(screen=self,eventmap=
 			{
-				iPlayableService.evUpdatedInfo: self.__eventInfoChanged,
-				iPlayableService.evVideoSizeChanged: self.__videoSizeChanged
+				iPlayableService.evUpdatedEventInfo: self.__eventInfoChanged
 			})
-		session.nav.record_event.append(self.gotRecordEvent)
-		self.mp3Available = False
-		self.dolbyAvailable = False
 
 	def __eventInfoChanged(self):
-		if Screens.Standby.inStandby:
+		if config.plugins.VFD_spark.showClock.value == 'Off' or config.plugins.VFD_spark.showClock.value == 'True_All':
 			return
-		if config.plugins.VFD_spark.textMode.value == 'ChNumber':
-			vfdtext = self.getChannelNr()
-		elif config.plugins.VFD_spark.textMode.value == 'ChName':
-			vfdtext = self.getChannelName()
+		service = self.session.nav.getCurrentService()
+		info = service and service.info()
+		if info is None:
+			chnr = "----"
 		else:
-			vfdtext = "---"
-		vfd_write_string(vfdtext)
-		self.checkAudioTracks()
-		self.showCrypted()
-		self.showDolby()
-		self.showMp3()
+			chnr = self.getchannelnr()
+		info = None
+		service = None
+		if chnr == "----":
+			vfd_write(chnr)
+		else:
+			Channelnr = "%04d" % (int(chnr))
+			vfd_write(Channelnr)
 
-	def __videoSizeChanged(self):
-                if Screens.Standby.inStandby:
-                        return
-		service=self.session.nav.getCurrentService()
-		if service is not None:
-			info=service.info()
-			height = info and info.getInfo(iServiceInformation.sVideoHeight) or -1
-			if height > 576 : #set HD symbol
-				vfd_set_icon(14,1)
-			else:
-				vfd_set_icon(14,0)
-
-	def getChannelNr(self):
+	def getchannelnr(self):
 		if InfoBar.instance is None:
-			chnr = "---"
+			chnr = "----"
 			return chnr
 		MYCHANSEL = InfoBar.instance.servicelist
 		markersOffset = 0
@@ -104,114 +90,81 @@ class Channelnumber:
 		chx = (chx - markersOffset) + 1
 		rx = MYCHANSEL.getBouquetNumOffset(myRoot)
 		chnr = str(chx + rx)
-		########## Center Channel number #################
-		t = len(chnr)
-		if t == 1:
-			CentChnr = "000" + chnr + '\n'
-		elif t == 2:
-			CentChnr = "00" + chnr + '\n'
-		elif t == 3:
-			CentChnr = "0" + chnr + '\n'
-		else:
-			CentChnr = chnr + '\n'
-		#################################################
-		return CentChnr
+		return chnr
 
-	def getChannelName(self):
-		servicename = ""
-		currPlay = self.session.nav.getCurrentService()
-		if currPlay != None and self.mp3Available:
-			# show the MP3 tag
-			servicename = currPlay.info().getInfoString(iServiceInformation.sTagTitle)
+	def prikaz(self):
+		if config.plugins.VFD_spark.showClock.value == 'True' or config.plugins.VFD_spark.showClock.value == 'True_All' or config.plugins.VFD_spark.showClock.value == 'True_Switch':
+			clock = str(localtime()[3])
+			clock1 = str(localtime()[4])
+			if config.plugins.VFD_spark.timeMode.value != '24h':
+				if int(clock) > 12:
+					clock = str(int(clock) - 12)
+
+			if self.sign == 0:
+				clock2 = "%02d:%02d" % (int(clock), int(clock1))
+				self.sign = 1
+			else:
+				clock2 = "%02d%02d" % (int(clock), int(clock1))
+				self.sign = 0
+
+			vfd_write(clock2)
 		else:
-			# show the service name
-			self.service = self.session.nav.getCurrentlyPlayingServiceReference()
-			if not self.service is None:
-				service = self.service.toCompareString()
-				servicename = ServiceReference.ServiceReference(service).getServiceName().replace('\xc2\x87', '').replace('\xc2\x86', '').ljust(16)
-				subservice = self.service.toString().split("::")
-				if subservice[0].count(':') == 9:
-					servicename = subservice[1].replace('\xc2\x87', '').replace('\xc3\x9f', 'ss').replace('\xc2\x86', '').ljust(16)
+			vfd_write("....")
+
+	def vrime(self):
+		if (config.plugins.VFD_spark.showClock.value == 'True' or config.plugins.VFD_spark.showClock.value == 'False' or config.plugins.VFD_spark.showClock.value == 'True_Switch') and not Screens.Standby.inStandby:
+			if config.plugins.VFD_spark.showClock.value == 'True_Switch':
+				if time() >= self.begin:
+					self.endkeypress = False
+				if self.endkeypress:
+					self.__eventInfoChanged()
 				else:
-					servicename=servicename
+					self.prikaz()
 			else:
-				servicename="---"
-		return servicename
-
-	def showCrypted(self):
-		service=self.session.nav.getCurrentService()
-		if service is not None:
-			info=service.info()
-			crypted = info and info.getInfo(iServiceInformation.sIsCrypted) or -1
-			if crypted == 1 : #set crypt symbol
-				vfd_set_icon(11,1)
-			else:
-				vfd_set_icon(11,0)
-
-	def checkAudioTracks(self):
-		self.dolbyAvailable = False
-		self.mp3Available = False
-		service=self.session.nav.getCurrentService()
-		if service is not None:
-			audio = service.audioTracks()
-			if audio:
-				n = audio.getNumberOfTracks()
-				for x in range(n):
-					i = audio.getTrackInfo(x)
-					description = i.getDescription();
-					if description.find("MP3") != -1:
-						self.mp3Available = True
-					if description.find("AC3") != -1 or description.find("DTS") != -1:
-						self.dolbyAvailable = True
-
-	def showDolby(self):
-		if self.dolbyAvailable:
-			vfd_set_icon(10,1)
+				self.__eventInfoChanged()
+					
+		if config.plugins.VFD_spark.showClock.value == 'Off':
+			vfd_write("....")
+			self.zaPrik.start(self.updatetime, 1)
+			return
 		else:
-			vfd_set_icon(10,0)
+			self.zaPrik.start(1000, 1)
 
-	def showMp3(self):
-		if self.mp3Available:
-			vfd_set_icon(25,1)
-		else:
-			vfd_set_icon(25,0)
+		if Screens.Standby.inStandby or config.plugins.VFD_spark.showClock.value == 'True_All':
+			self.prikaz()
 
-	def gotRecordEvent(self, service, event):
-		recs = self.session.nav.getRecordings()
-		nrecs = len(recs)
-		if nrecs > 0: #set rec symbol
-			vfd_set_icon(7,1)
-		else:
-			vfd_set_icon(7,0)
+	def keyPressed(self, key, tag):
+		self.begin = time() + int(self.channelnrdelay)
+		self.endkeypress = True
 
 ChannelnumberInstance = None
 
 def leaveStandby():
 	print "[VFD-SPARK] Leave Standby"
-	vfd_write_string("....")
-	vfd_set_icon(36,1)
-	if config.plugins.VFD_spark.ledMode.value == 'True':
-		vfd_set_led(0)
+
+	if config.plugins.VFD_spark.showClock.value == 'Off':
+		vfd_write("....")
 
 def standbyCounterChanged(configElement):
 	print "[VFD-SPARK] In Standby"
+
 	from Screens.Standby import inStandby
 	inStandby.onClose.append(leaveStandby)
-	vfd_clear()
-	if config.plugins.VFD_spark.ledMode.value == 'True':
-		vfd_set_led(1)
+
+	if config.plugins.VFD_spark.showClock.value == 'Off':
+		vfd_write("....")
 
 def initVFD():
 	print "[VFD-SPARK] initVFD"
-	vfd_write_string("....")
-	vfd_set_led(0)
-#	vfd_set_time()
 
-class VFD_SparkSetup(ConfigListScreen, Screen):
+	if config.plugins.VFD_spark.showClock.value == 'Off':
+		vfd_write("....")
+
+class VFD_SPARKSetup(ConfigListScreen, Screen):
 	def __init__(self, session, args = None):
 
 		self.skin = """
-			<screen position="100,100" size="500,210" title="VFD Spark Setup" >
+			<screen position="100,100" size="500,210" title="LED Display Setup" >
 				<widget name="config" position="20,15" size="460,150" scrollbarMode="showOnDemand" />
 				<ePixmap position="40,165" size="140,40" pixmap="skin_default/buttons/green.png" alphatest="on" />
 				<ePixmap position="180,165" size="140,40" pixmap="skin_default/buttons/red.png" alphatest="on" />
@@ -244,8 +197,9 @@ class VFD_SparkSetup(ConfigListScreen, Screen):
 	def createSetup(self):
 		self.editListEntry = None
 		self.list = []
-		self.list.append(getConfigListEntry(_("VFD text"), config.plugins.VFD_spark.textMode))
-		self.list.append(getConfigListEntry(_("VFD led in standby"), config.plugins.VFD_spark.ledMode))
+		self.list.append(getConfigListEntry(_("Show on VFD"), config.plugins.VFD_spark.showClock))
+		if config.plugins.VFD_spark.showClock.value != "Off":
+			self.list.append(getConfigListEntry(_("Time mode"), config.plugins.VFD_spark.timeMode))
 
 		self["config"].list = self.list
 		self["config"].l.setList(self.list)
@@ -257,7 +211,7 @@ class VFD_SparkSetup(ConfigListScreen, Screen):
 
 	def newConfig(self):
 		print self["config"].getCurrent()[0]
-		if self["config"].getCurrent()[0] == _('VFD text'):
+		if self["config"].getCurrent()[0] == _('Show on VFD'):
 			self.createSetup()
 
 	def abort(self):
@@ -281,15 +235,17 @@ class VFD_SparkSetup(ConfigListScreen, Screen):
 		self.createSetup()
 		initVFD()
 
-class VFD_Spark:
+class VFD_SPARK:
 	def __init__(self, session):
 		print "[VFD-SPARK] initializing"
 		self.session = session
 		self.service = None
 		self.onClose = [ ]
+
 		self.Console = Console()
+
 		initVFD()
-#		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().append(vfd_set_time)
+
 		global ChannelnumberInstance
 		if ChannelnumberInstance is None:
 			ChannelnumberInstance = Channelnumber(session)
@@ -299,17 +255,15 @@ class VFD_Spark:
 
 	def abort(self):
 		print "[VFD-SPARK] aborting"
-#		eDVBLocalTimeHandler.getInstance().m_timeUpdated.get().remove(vfd_set_time)
-
-	config.misc.standbyCounter.addNotifier(standbyCounterChanged, initial_call = False)
+		config.misc.standbyCounter.addNotifier(standbyCounterChanged, initial_call = False)
 
 def main(menuid):
 	if menuid != "system":
 		return [ ]
-	return [(_("VFD_Spark"), startVFD, "VFD_Spark", None)]
+	return [(_("LED Display Setup"), startVFD, "VFD_SPARK", None)]
 
 def startVFD(session, **kwargs):
-	session.open(VFD_SparkSetup)
+	session.open(VFD_SPARKSetup)
 
 sparkVfd = None
 gReason = -1
@@ -322,7 +276,7 @@ def controlsparkVfd():
 
 	if gReason == 0 and mySession != None and sparkVfd == None:
 		print "[VFD-SPARK] Starting !!"
-		sparkVfd = VFD_Spark(mySession)
+		sparkVfd = VFD_SPARK(mySession)
 	elif gReason == 1 and sparkVfd != None:
 		print "[VFD-SPARK] Stopping !!"
 
@@ -341,6 +295,8 @@ def sessionstart(reason, **kwargs):
 	controlsparkVfd()
 
 def Plugins(**kwargs):
- 	return [ PluginDescriptor(where=[PluginDescriptor.WHERE_AUTOSTART, PluginDescriptor.WHERE_SESSIONSTART], fnc=sessionstart),
- 		PluginDescriptor(name="VFD Spark", description="Change VFD display settings",where = PluginDescriptor.WHERE_MENU, fnc = main) ]
-
+		if getBoxType() in ('amiko8900'):
+			return [ PluginDescriptor(where=[PluginDescriptor.WHERE_AUTOSTART, PluginDescriptor.WHERE_SESSIONSTART], fnc=sessionstart),
+				PluginDescriptor(name="LED Display Setup", description="Change VFD display settings",where = PluginDescriptor.WHERE_MENU, fnc = main) ]
+		else:
+			return []
