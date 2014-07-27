@@ -7,10 +7,14 @@ install_PYTHON = *.py
 install_SCRIPTS = FritzCallUserAction.sh
 install_DATA = plugin.png History.txt
 
-if CUBE
-SUBDIRS += arm
-else if SPARK
+if SH4
 SUBDIRS += sh4
-else
+endif
+
+if MIPSEL
 SUBDIRS += mips
+endif
+
+if ARM
+SUBDIRS += arm
 endif
