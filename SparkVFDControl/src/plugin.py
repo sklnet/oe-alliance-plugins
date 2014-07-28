@@ -99,14 +99,7 @@ class Channelnumber:
 			if config.plugins.VFD_spark.timeMode.value != '24h':
 				if int(clock) > 12:
 					clock = str(int(clock) - 12)
-
-			if self.sign == 0:
-				clock2 = "%02d:%02d" % (int(clock), int(clock1))
-				self.sign = 1
-			else:
-				clock2 = "%02d%02d" % (int(clock), int(clock1))
-				self.sign = 0
-
+			clock2 = "%02d%02d" % (int(clock), int(clock1))
 			vfd_write(clock2)
 		else:
 			vfd_write("....")
